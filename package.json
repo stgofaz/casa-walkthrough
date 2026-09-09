@@ -1,0 +1,7 @@
+{
+  "name": "casa-walkthrough",
+  "private": true,
+  "type": "module",
+  "engines": {"node": "24.x"},
+  "scripts": {"build": "node build.mjs"}
+}

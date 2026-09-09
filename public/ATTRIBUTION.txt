@@ -1,0 +1,7 @@
+Architecture visualization: Three.js/WebGL.
+Three.js and Lucide licenses are included in vendor/.
+Furniture, material textures and sunset HDR: Poly Haven, CC0.
+https://polyhaven.com/license
+Assets: Modern Arm Chair 01, Dining Chair 02, Oak Veneer 01,
+Fabric Pattern 07, White Plaster Rough 01, Belfast Sunset Pure Sky.
+The three framed artworks are generated compositions for this scene.

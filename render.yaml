@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: casa-walkthrough
+    runtime: static
+    buildCommand: node build.mjs
+    staticPublishPath: ./dist
+    headers:
+      - path: /*
+        name: X-Robots-Tag
+        value: noindex, nofollow, noarchive
+      - path: /*
+        name: Referrer-Policy
+        value: no-referrer
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff

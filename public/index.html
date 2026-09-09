@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Casa · Recorrido 3D</title>
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="referrer" content="no-referrer">
+  <link rel="stylesheet" href="styles.css">
+  <script type="importmap">{"imports":{"three":"./vendor/three/build/three.module.js","three/addons/":"./vendor/three/examples/jsm/"}}</script>
+  <script src="vendor/lucide/dist/umd/lucide.min.js"></script>
+</head>
+<body>
+  <main id="app">
+    <canvas id="scene" tabindex="0" aria-label="Modelo tridimensional de la casa"></canvas>
+    <header>
+      <div class="identity"><span class="project-icon"><i data-lucide="box"></i></span><div><h1>Casa · Recorrido 3D</h1></div></div>
+      <div class="actions">
+        <button class="icon" id="walk" title="Walkthrough interactivo" aria-label="Walkthrough interactivo" aria-pressed="false"><i data-lucide="footprints"></i></button>
+        <button class="icon" id="cinema" title="Recorrido cinematográfico" aria-label="Recorrido cinematográfico" aria-pressed="false"><i data-lucide="film"></i></button>
+        <button class="icon" id="reset" title="Encuadrar casa" aria-label="Encuadrar casa"><i data-lucide="scan"></i></button>
+        <button class="icon" id="snapshot" title="Descargar render PNG" aria-label="Descargar render PNG"><i data-lucide="camera"></i></button>
+        <button class="icon" id="settings" title="Ajustes de escena" aria-label="Ajustes de escena" aria-expanded="false"><i data-lucide="sliders-horizontal"></i></button>
+      </div>
+    </header>
+    <aside id="panel" hidden>
+      <div class="panel-heading"><h2>Escena</h2><button class="icon" id="close-panel" aria-label="Cerrar ajustes" title="Cerrar ajustes"><i data-lucide="x"></i></button></div>
+      <div class="field"><label for="roof">Techumbre</label><input id="roof" type="checkbox" role="switch" checked></div>
+      <div class="field"><label for="furniture">Mobiliario</label><input id="furniture" type="checkbox" role="switch" checked></div>
+      <div class="field"><label for="kitchen-door">Cocina: puerta abierta</label><input id="kitchen-door" type="checkbox" role="switch" checked></div>
+      <div class="field"><label for="plants">Vegetación</label><input id="plants" type="checkbox" role="switch" checked></div>
+      <div class="field"><label for="lamps">Luminarias interiores</label><input id="lamps" type="checkbox" role="switch" checked></div>
+      <hr>
+      <h3>Acabado</h3><div class="segments" id="materials"><button data-material="natural" class="active">Materiales</button><button data-material="white">Maqueta</button></div>
+      <h3><label for="sun">Atardecer</label><output id="sun-value">Hora mágica</output></h3><input id="sun" type="range" min="0" max="100" value="78">
+      <h3>Recintos</h3><select id="room" aria-label="Ir a recinto"><option value="">Seleccionar recinto</option><option value="salon">Living</option><option value="living">Comedor y cocina</option><option value="livingHall">Living hacia el hall</option><option value="hall">Hall y jardín interior</option><option value="kitchen">Cocina</option><option value="quincho">Quincho</option><option value="banoQuincho">Baño quincho</option><option value="principal">Dormitorio principal</option><option value="banoPrincipal">Baño principal</option><option value="banoVanitorio">Baño principal · vanitorio</option><option value="estar">Sala de estar</option><option value="consulta">Consulta</option></select>
+      <p class="provenance">Mobiliario y ambientación referenciales<br><a href="https://polyhaven.com/license" target="_blank" rel="noopener noreferrer">Modelos, texturas y HDR · Poly Haven CC0</a></p>
+    </aside>
+    <div id="cinema-fade" aria-hidden="true"></div>
+    <div id="walk-crosshair" aria-hidden="true"></div>
+    <section id="walk-controls" aria-label="Walkthrough interactivo" hidden>
+      <div class="walk-meta"><span>Walkthrough</span><output id="walk-distance">0,0 m</output><span id="walk-state">En vivo</span></div>
+      <select id="walk-room" aria-label="Destino del walkthrough"></select>
+      <div class="walk-tools">
+        <button class="icon" id="walk-pause" aria-label="Pausar caminata" title="Pausar caminata"><i data-lucide="pause"></i></button>
+        <button class="icon" id="walk-lock" aria-label="Capturar ratón" title="Capturar ratón · Esc para liberar"><i data-lucide="mouse-pointer-2"></i></button>
+        <button class="icon" id="walk-door" aria-label="Accionar puerta" title="Accionar puerta · E" disabled><i data-lucide="door-open"></i></button>
+        <select id="walk-speed" aria-label="Velocidad de caminata"><option value="0.7">Lenta</option><option value="1.25" selected>Natural</option><option value="1.8">Ágil</option></select>
+        <button class="icon" id="walk-close" aria-label="Salir del walkthrough" title="Salir del walkthrough"><i data-lucide="x"></i></button>
+      </div>
+    </section>
+    <div id="walk-movement" class="walk-pad" role="group" aria-label="Desplazamiento" hidden>
+      <button class="icon" data-move="0,1" title="Avanzar · W" aria-label="Avanzar"><i data-lucide="arrow-up"></i></button>
+      <button class="icon" data-move="-1,0" title="Desplazarse a la izquierda · A" aria-label="Desplazarse a la izquierda"><i data-lucide="arrow-left"></i></button>
+      <button class="icon" data-move="0,-1" title="Retroceder · S" aria-label="Retroceder"><i data-lucide="arrow-down"></i></button>
+      <button class="icon" data-move="1,0" title="Desplazarse a la derecha · D" aria-label="Desplazarse a la derecha"><i data-lucide="arrow-right"></i></button>
+    </div>
+    <div id="walk-look" class="walk-pad" role="group" aria-label="Orientación de cámara" hidden>
+      <button class="icon" data-turn="1" title="Girar a la izquierda" aria-label="Girar a la izquierda"><i data-lucide="rotate-ccw"></i></button>
+      <button class="icon" data-turn="-1" title="Girar a la derecha" aria-label="Girar a la derecha"><i data-lucide="rotate-cw"></i></button>
+    </div>
+    <section id="cinema-controls" aria-label="Reproducción cinematográfica" hidden>
+      <div class="cinema-meta"><span id="shot-name">Llegada</span><output id="tour-time">0:00 / 1:45</output></div>
+      <input id="tour-progress" type="range" min="0" max="105" value="0" step="0.1" aria-label="Posición del recorrido">
+      <div class="cinema-buttons">
+        <button class="icon" id="tour-prev" aria-label="Toma anterior" title="Toma anterior"><i data-lucide="skip-back"></i></button>
+        <button class="icon" id="tour-play" aria-label="Pausar recorrido" title="Pausar recorrido"><i data-lucide="pause"></i></button>
+        <button class="icon" id="tour-next" aria-label="Toma siguiente" title="Toma siguiente"><i data-lucide="skip-forward"></i></button>
+        <select id="tour-speed" aria-label="Velocidad del recorrido"><option value="0.5">0,5×</option><option value="1" selected>1×</option><option value="1.5">1,5×</option><option value="2">2×</option></select>
+        <button class="icon" id="tour-close" aria-label="Salir del recorrido" title="Salir del recorrido"><i data-lucide="x"></i></button>
+      </div>
+    </section>
+    <nav class="views" aria-label="Vistas"><button data-view="general" class="active"><i data-lucide="orbit"></i><span>General</span></button><button data-view="patios"><i data-lucide="trees"></i><span>Patios</span></button><button data-view="acceso"><i data-lucide="door-open"></i><span>Acceso</span></button><button data-view="salon"><i data-lucide="armchair"></i><span>Living</span></button><button data-view="hall"><i data-lucide="waypoints"></i><span>Hall</span></button></nav>
+    <div class="view-label"><span id="view-name">Vista general</span><span id="mode-label">PERSPECTIVA</span></div>
+    <div id="toast" role="status"></div>
+    <div id="loading"><span class="loader"></span><span>Preparando recorrido</span></div>
+    <div id="failure" hidden></div>
+  </main>
+  <script type="module" src="main.js"></script>
+</body>
+</html>
